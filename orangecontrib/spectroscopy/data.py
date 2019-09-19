@@ -35,6 +35,76 @@ class SpectralFileFormat:
     def read(self):
         return build_spec_table(*self.read_spectra())
 
+class GwyddionGSF(FileFormat, SpectralFileFormat):
+    """ Reader for files with multiple columns of numbers. The first column
+    contains the wavelengths, the others contain the spectra. """
+    EXTENSIONS = ('.gsf',)
+    DESCRIPTION = 'Gwyddion Simple Field'
+
+    def read_spectra(self):
+        '''Read a Gwyddion Simple Field 1.0 file format
+        http://gwyddion.net/documentation/user-guide-en/gsf.html
+
+        Args:
+            file_name (string): the name of the output (any extension will be replaced)
+        Returns:
+            metadata (dict): additional metadata to be included in the file
+            data (2darray): an arbitrary sized 2D array of arbitrary numeric type
+
+        This code is based on https://gist.github.com/carlodri/66c471498e6b52caf213
+        '''
+        if self.filename.rpartition('.')[1] == '.':
+            self.filename = self.filename[0:self.filename.rfind('.')]
+
+        gsfFile = open(self.filename + '.gsf', 'rb')
+
+        metadata = {}
+
+        # check if header is OK
+        if not (gsfFile.readline().decode('UTF-8') == 'Gwyddion Simple Field 1.0\n'):
+            gsfFile.close()
+            raise ValueError('File has wrong header')
+
+        term = b'00'
+        # read metadata header
+        while term != b'\x00':
+            line_string = gsfFile.readline().decode('UTF-8')
+            metadata[line_string.rpartition('=')[0].strip()] = line_string.rpartition('=')[2].strip()
+            term = gsfFile.read(1)
+            gsfFile.seek(-1, 1)
+
+        gsfFile.read(4 - gsfFile.tell() % 4)
+
+        # fix known metadata types from .gsf file specs
+        # first the mandatory ones...
+        metadata['XRes'] = np.int(metadata['XRes'])
+        metadata['YRes'] = np.int(metadata['YRes'])
+
+        # now check for the optional ones
+        if 'XReal' in metadata:
+            metadata['XReal'] = np.float(metadata['XReal'])
+
+        if 'YReal' in metadata:
+            metadata['YReal'] = np.float(metadata['YReal'])
+
+        if 'XOffset' in metadata:
+            metadata['XOffset'] = np.float(metadata['XOffset'])
+
+        if 'YOffset' in metadata:
+            metadata['YOffset'] = np.float(metadata['YOffset'])
+
+        gsf_data = np.frombuffer(gsfFile.read(), dtype='float32')
+
+        gsfFile.close()
+
+        x_locs = np.asarray(np.arange(metadata['XRes']-1, -1, -1))
+        y_locs = np.asarray(np.arange(metadata['YRes']))
+
+        gsf_data = np.flipud(gsf_data.T)
+        X = gsf_data.reshape((metadata['YRes'], metadata['XRes']) + (1,))
+        data = _spectra_from_image(X, [1], x_locs, y_locs)
+
+        return data
 
 class AsciiColReader(FileFormat, SpectralFileFormat):
     """ Reader for files with multiple columns of numbers. The first column
