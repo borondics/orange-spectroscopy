@@ -252,8 +252,10 @@ class OWSpectralSeries(OWWidget):
 
     class Inputs:
         data = Input("Data", Table, default=True)
+        data_subset = Input("Data subset", Table)
 
     class Outputs:
+        # TODO Question: should we add a channel that outputs the rest of data that is not selected?
         selected_data = Output("Selection", Table, default=True)
         annotated_data = Output(ANNOTATED_DATA_SIGNAL_NAME, Table)
 
@@ -319,6 +321,14 @@ class OWSpectralSeries(OWWidget):
         self.output_image_selection()
 
 
+    @Inputs.data_subset
+    def set_subset(self, data):
+        # this is not correct because it actually selects it and we only need highlighting
+        # we need to change the pen color
+        self.imageplot.make_selection(data.ids if data else None)
+
+
 if __name__ == "__main__":  # pragma: no cover
     from Orange.widgets.utils.widgetpreview import WidgetPreview
-    WidgetPreview(OWSpectralSeries).run(Table("collagen"))
+    data = Table("collagen")
+    WidgetPreview(OWSpectralSeries).run(set_data=data, set_subset=data[40:80])
