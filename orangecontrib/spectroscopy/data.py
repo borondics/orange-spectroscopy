@@ -1070,5 +1070,19 @@ class DatMetaReader(FileFormat):
             return AsciiColReader(filename=self.filename).read()
 
 
+class TXTMetaReader(FileFormat):
+    """ Meta-reader to handle different structure TXT files. """
+    EXTENSIONS = ('.txt', '.TXT')
+    DESCRIPTION = 'Generic TXT file'
+
+    PRIORITY = min(SelectColumnReader.PRIORITY, AvantesTXTReader.PRIORITY) - 1
+
+    def read(self):
+        try:
+            return SelectColumnReader(filename=self.filename).read()
+        except IndexError:
+            return AvantesTXTReader(filename=self.filename).read()
+
+
 def spectra_mean(X):
     return np.nanmean(X, axis=0, dtype=np.float64)
