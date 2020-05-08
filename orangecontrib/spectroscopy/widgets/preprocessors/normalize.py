@@ -26,6 +26,7 @@ class NormalizeEditor(BaseEditorOrange):
         ("Vector Normalization", Normalize.Vector),
         ("Area Normalization", Normalize.Area),
         ("Attribute Normalization", Normalize.Attribute),
+        ("Min-Max Normalization", Normalize.MinMax),
         ("Normalize by Reference", NORMALIZE_BY_REFERENCE)]
 
     def __init__(self, parent=None, **kwargs):
