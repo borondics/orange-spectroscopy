@@ -8,6 +8,7 @@ import numpy as np
 import spectral.io.envi
 from scipy.interpolate import interp1d
 from scipy.io import matlab
+from renishawWiRE import WDFReader
 
 import Orange
 from Orange.data import \
@@ -137,12 +138,20 @@ def _spectra_from_image(X, features, x_locs, y_locs):
     y_locs = np.asarray(y_locs)
 
     # each spectrum has its own row
-    spectra = X.reshape((X.shape[0]*X.shape[1], X.shape[2]))
+    if len(X.shape) == 3: # 2D map
+        spectra = X.reshape((X.shape[0]*X.shape[1], X.shape[2]))
 
-    # locations
-    y_loc = np.repeat(np.arange(X.shape[0]), X.shape[1])
-    x_loc = np.tile(np.arange(X.shape[1]), X.shape[0])
-    metas = np.array([x_locs[x_loc], y_locs[y_loc]]).T
+        # locations
+        y_loc = np.repeat(np.arange(X.shape[0]), X.shape[1])
+        x_loc = np.tile(np.arange(X.shape[1]), X.shape[0])
+        metas = np.array([x_locs[x_loc], y_locs[y_loc]]).T
+
+    elif len(X.shape) == 2: # line scan
+        spectra = X
+
+        # locations
+        metas = np.vstack((x_locs, y_locs)).T
+
 
     domain = Orange.data.Domain([], None,
                                 metas=[Orange.data.ContinuousVariable.make("map_x"),
@@ -496,6 +505,55 @@ class agilentMosaicIFGReader(FileFormat, SpectralFileFormat):
         table[:, new_attributes] = np.asarray(new_columns).T
 
         return (features, data, table)
+
+class WiREReaders(FileFormat, SpectralFileFormat):
+    EXTENSIONS = ('.wdf', '.WDF')
+    DESCRIPTION = 'Renishaw WiRE WDF reader'
+
+    def read_spectra(self):
+        wdf_file = WDFReader(self.filename)
+
+        if wdf_file.measurement_type == 1: # single point spectra
+            table = self.sp_reader(wdf_file)
+        elif wdf_file.measurement_type == 2: # depth scan
+            table = self.depth_reader(wdf_file)
+        elif wdf_file.measurement_type == 3: # line scan
+            table = self.map_reader(wdf_file)
+
+        return table
+
+    def sp_reader(self, wdf_file):
+
+        domvals = wdf_file.xdata # energies
+        domain = Domain([ContinuousVariable.make("%f" % f) for f in domvals], None)
+        y_data = wdf_file.spectra
+        print(y_data)
+        # table = Orange.data.Table.from_numpy(domain, y_data.astype(float, order='C'))
+        table = Orange.data.Table.from_numpy(domain, domvals, y_data)
+        return table
+
+    def depth_reader(self, wdf_file):
+
+        domvals = wdf_file.xdata # energies
+        y_data = wdf_file.spectra # spectra
+        z_locs = wdf_file.zpos # depth info
+
+        domain = Orange.data.Domain([], None,
+                                    metas=[Orange.data.ContinuousVariable.make("map_z")]
+                                   )
+        data = Orange.data.Table.from_numpy(domain, X=np.zeros((len(y_data), 0)),
+                                            metas=np.asarray(z_locs, dtype=object))
+        return domvals, y_data, data
+
+    def map_reader(self, wdf_file):
+
+        domvals = wdf_file.xdata
+
+        y_data = wdf_file.spectra
+        x_locs = np.unique(wdf_file.xpos)
+        y_locs = np.unique(wdf_file.ypos)
+
+        return _spectra_from_image(y_data, domvals, x_locs, y_locs)
 
 
 class SPCReader(FileFormat):
