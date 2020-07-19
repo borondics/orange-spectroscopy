@@ -512,35 +512,34 @@ class WiREReaders(FileFormat, SpectralFileFormat):
 
     def read_spectra(self):
         wdf_file = WDFReader(self.filename)
+        print('wdf_file.measurement_type', wdf_file.measurement_type)
 
         if wdf_file.measurement_type == 1: # single point spectra
-            table = self.sp_reader(wdf_file)
-        elif wdf_file.measurement_type == 2: # depth scan
-            table = self.depth_reader(wdf_file)
+            table = self.single_reader(wdf_file)
+        elif wdf_file.measurement_type == 2: # series scan
+            table = self.series_reader(wdf_file)
         elif wdf_file.measurement_type == 3: # line scan
             table = self.map_reader(wdf_file)
 
         return table
 
-    def sp_reader(self, wdf_file):
+    def single_reader(self, wdf_file):
 
         domvals = wdf_file.xdata # energies
-        domain = Domain([ContinuousVariable.make("%f" % f) for f in domvals], None)
-        y_data = wdf_file.spectra
-        print(y_data)
-        # table = Orange.data.Table.from_numpy(domain, y_data.astype(float, order='C'))
-        table = Orange.data.Table.from_numpy(domain, domvals, y_data)
-        return table
+        y_data = wdf_file.spectra # spectra
 
-    def depth_reader(self, wdf_file):
+        return domvals, y_data, None
+
+    def series_reader(self, wdf_file):
 
         domvals = wdf_file.xdata # energies
         y_data = wdf_file.spectra # spectra
         z_locs = wdf_file.zpos # depth info
+        z_locs = z_locs.reshape(-1, 1)
 
         domain = Orange.data.Domain([], None,
-                                    metas=[Orange.data.ContinuousVariable.make("map_z")]
-                                   )
+                                    metas=[Orange.data.ContinuousVariable.make("map_z")])
+
         data = Orange.data.Table.from_numpy(domain, X=np.zeros((len(y_data), 0)),
                                             metas=np.asarray(z_locs, dtype=object))
         return domvals, y_data, data

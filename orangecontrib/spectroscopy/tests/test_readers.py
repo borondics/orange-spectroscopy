@@ -10,7 +10,7 @@ from Orange.widgets.data.owfile import OWFile
 from orangecontrib.spectroscopy.data import getx, build_spec_table, SelectColumnReader, NeaReader
 from orangecontrib.spectroscopy.preprocess import features_with_interpolation
 from orangecontrib.spectroscopy.data import SPAReader, agilentMosaicIFGReader
-from orangecontrib.spectroscopy.data import NeaReaderGSF
+from orangecontrib.spectroscopy.data import NeaReaderGSF, WDFReader
 
 try:
     import opusFC
@@ -122,6 +122,28 @@ class TestAsciiMapReader(unittest.TestCase):
             d2 = Orange.data.Table(fn)
             np.testing.assert_equal(np.isnan(d2.metas), np.ones((150, 2)))
 
+
+class TestRenishawReader(unittest.TestCase):
+
+    def test_single_sp_reader(self):
+        d = Orange.data.Table("renishaw_test_files/sp.wdf")
+        self.assertEqual(d.X[0][4], 52.4945182800293)
+        self.assertEqual(min(getx(d)), 1226.275269)
+        self.assertEqual(max(getx(d)), 2787.514404)
+
+    def test_depth_reader(self):
+        d = Orange.data.Table("renishaw_test_files/depth.wdf")
+        self.assertEqual(d.X[3][4], 1.8102257251739502)
+        self.assertEqual(min(getx(d)), 1226.605347)
+        self.assertEqual(max(getx(d)), 2787.782959)
+
+    def test_map_reader(self):
+        # this is a line map, but the 2D maps are the same structure
+        # TODO change this to a smaller size file later
+        d = Orange.data.Table("renishaw_test_files/line.wdf")
+        self.assertEqual(d.X[3][4], 112.22956848144531)
+        self.assertEqual(min(getx(d)), 1226.267578)
+        self.assertEqual(max(getx(d)), 2787.509766)
 
 class TestAgilentReader(unittest.TestCase):
 
