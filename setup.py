@@ -137,6 +137,7 @@ if __name__ == '__main__':
             'colorcet',
             'h5py',
             'extranormal3',
+            'renishawWiRE',
         ],
         entry_points=ENTRY_POINTS,
         keywords=KEYWORDS,
