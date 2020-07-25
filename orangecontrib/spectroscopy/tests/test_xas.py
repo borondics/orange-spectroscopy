@@ -1,9 +1,11 @@
 import unittest
 import numpy
+
+from orangecontrib.spectroscopy.preprocess import XASnormalization, ExtractEXAFS, \
+    NoEdgejumpProvidedException
+
 import Orange
 from Orange.data import Table
-
-from orangecontrib.spectroscopy.preprocess import XASnormalization, ExtractEXAFS, NoEdgejumpProvidedException
 
 
 class TestXASnormalization(unittest.TestCase):

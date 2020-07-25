@@ -1,8 +1,10 @@
-import numpy as np
-import Orange
 import unittest
+import numpy as np
+
 from orangecontrib.spectroscopy.preprocess import Cut
 from orangecontrib.spectroscopy.data import getx
+
+import Orange
 
 
 class TestCut(unittest.TestCase):

@@ -139,7 +139,8 @@ class TestME_EMSC(unittest.TestCase):
         #
         # weights = weights_from_inflection_points(inflPoints, kappa, self.wnS)
 
-        f = ME_EMSC(reference=cls.reference, ncomp=False, weights=False, max_iter=45, output_model=True)
+        f = ME_EMSC(reference=cls.reference, ncomp=False, weights=False, max_iter=45,
+                    output_model=True)
         cls.f1data = f(cls.spectra)
 
         f2 = ME_EMSC(reference=cls.reference, ncomp=14, output_model=True)  # With weights
@@ -155,7 +156,8 @@ class TestME_EMSC(unittest.TestCase):
         plt.figure()
         plt.plot(self.wnS[0::20], self.f1data[0, 0::20].X.T, label='python')
         plt.plot(self.wnS[0::20], self.corr_default_20th_elem, label='matlab')
-        plt.plot(self.wnS[0::20], self.f1data[0, 0::20].X.T[:, 0] - self.corr_default_20th_elem, label='diff')
+        plt.plot(self.wnS[0::20], self.f1data[0, 0::20].X.T[:, 0] - self.corr_default_20th_elem,
+                 label='diff')
         plt.legend()
         plt.title('Comparison Matlab/Python - default parameters')
 
@@ -163,7 +165,8 @@ class TestME_EMSC(unittest.TestCase):
         plt.figure()
         plt.plot(self.wnS[0::20], self.f2data[0, 0::20].X.T, label='python')
         plt.plot(self.wnS[0::20], self.corr_14ncomp_20th_elem, label='matlab')
-        plt.plot(self.wnS[0::20], self.f2data[0, 0::20].X.T[:, 0]-self.corr_14ncomp_20th_elem, label='diff')
+        plt.plot(self.wnS[0::20], self.f2data[0, 0::20].X.T[:, 0]-self.corr_14ncomp_20th_elem,
+                 label='diff')
         plt.legend()
         plt.title('Comparison Matlab/Python - 14 principal components')
 
@@ -171,27 +174,36 @@ class TestME_EMSC(unittest.TestCase):
         plt.figure()
         plt.plot(self.wnS[0::20], self.f3data[0, 0::20].X.T, label='python')
         plt.plot(self.wnS[0::20], self.corr_fixed_iter3_20th_elem, label='matlab')
-        plt.plot(self.wnS[0::20], self.f3data[0, 0::20].X.T[:, 0]-self.corr_fixed_iter3_20th_elem, label='diff')
+        plt.plot(self.wnS[0::20], self.f3data[0, 0::20].X.T[:, 0]-self.corr_fixed_iter3_20th_elem,
+                 label='diff')
         plt.legend()
         plt.title('Comparison Matlab/Python - fixed iterations 3')
         plt.show()
 
     def test_correction_output(self):
-        np.testing.assert_almost_equal(self.corr_default_20th_elem, self.f1data[0, 0::20].X.T[:, 0])
-        np.testing.assert_almost_equal(self.corr_14ncomp_20th_elem, self.f2data[0, 0::20].X.T[:, 0])
-        np.testing.assert_almost_equal(self.corr_fixed_iter3_20th_elem, self.f3data[0, 0::20].X.T[:, 0])
+        np.testing.assert_almost_equal(self.corr_default_20th_elem,
+                                       self.f1data[0, 0::20].X.T[:, 0])
+        np.testing.assert_almost_equal(self.corr_14ncomp_20th_elem,
+                                       self.f2data[0, 0::20].X.T[:, 0])
+        np.testing.assert_almost_equal(self.corr_fixed_iter3_20th_elem,
+                                       self.f3data[0, 0::20].X.T[:, 0])
 
     def test_EMSC_parameters(self):
-        np.testing.assert_almost_equal(abs(self.f1data.metas[0, :-2]), abs(self.param_default_20th_elem))
-        np.testing.assert_almost_equal(abs(self.f2data.metas[0, :-2]), abs(self.param_14ncomp_20th_elem))
-        np.testing.assert_almost_equal(abs(self.f3data.metas[0, :-2]), abs(self.param_fixed_iter3_20th_elem))
+        np.testing.assert_almost_equal(abs(self.f1data.metas[0, :-2]),
+                                       abs(self.param_default_20th_elem))
+        np.testing.assert_almost_equal(abs(self.f2data.metas[0, :-2]),
+                                       abs(self.param_14ncomp_20th_elem))
+        np.testing.assert_almost_equal(abs(self.f3data.metas[0, :-2]),
+                                       abs(self.param_fixed_iter3_20th_elem))
 
     def test_number_iterations(self):
-        numiter = np.array([self.f1data.metas[0, -2], self.f2data.metas[0, -2], self.f3data.metas[0, -2]])
+        numiter = np.array([self.f1data.metas[0, -2], self.f2data.metas[0, -2],
+                            self.f3data.metas[0, -2]])
         np.testing.assert_equal(numiter, self.numiter_std)
 
     def test_RMSE(self):
-        RMSE = np.array([self.f1data.metas[0, -1], self.f2data.metas[0, -1], self.f3data.metas[0, -1]])
+        RMSE = np.array([self.f1data.metas[0, -1], self.f2data.metas[0, -1],
+                         self.f3data.metas[0, -1]])
         np.testing.assert_equal(RMSE, self.RMSE_std)
 
     def test_same_data_reference(self):

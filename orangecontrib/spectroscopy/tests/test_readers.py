@@ -2,15 +2,17 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+
+from orangecontrib.spectroscopy.data import getx, build_spec_table, SelectColumnReader, NeaReader
+from orangecontrib.spectroscopy.preprocess import features_with_interpolation
+from orangecontrib.spectroscopy.data import SPAReader, agilentMosaicIFGReader
+from orangecontrib.spectroscopy.data import NeaReaderGSF
+
 import Orange
 from Orange.data import dataset_dirs
 from Orange.data.io import FileFormat
 from Orange.tests import named_file
 from Orange.widgets.data.owfile import OWFile
-from orangecontrib.spectroscopy.data import getx, build_spec_table, SelectColumnReader, NeaReader
-from orangecontrib.spectroscopy.preprocess import features_with_interpolation
-from orangecontrib.spectroscopy.data import SPAReader, agilentMosaicIFGReader
-from orangecontrib.spectroscopy.data import NeaReaderGSF
 
 try:
     import opusFC

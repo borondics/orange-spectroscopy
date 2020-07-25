@@ -8,12 +8,12 @@ that depends on another setting.
 import sys
 from decimal import Decimal
 
-import Orange
-from Orange.widgets.widget import OWWidget
-
 from orangecontrib.spectroscopy.widgets.gui import connect_settings, lineEditFloatRange, \
     ValueTransform, connect_line, MovableVline
 from orangecontrib.spectroscopy.widgets.owspectra import CurvePlot
+
+import Orange
+from Orange.widgets.widget import OWWidget
 
 
 class PlusAdd(ValueTransform):

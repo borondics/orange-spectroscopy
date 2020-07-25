@@ -128,8 +128,8 @@ def distance_curves(x, ys, q1):
     ysp = rolling_window(ys, 2)
 
     r = np.nanmin(distance_line_segment(xp[:, 0], ysp[:, :, 0],
-                              xp[:, 1], ysp[:, :, 1],
-                              q1[0], q1[1]), axis=1)
+                                        xp[:, 1], ysp[:, :, 1],
+                                        q1[0], q1[1]), axis=1)
 
     return r
 
@@ -195,4 +195,3 @@ if __name__ == "__main__":
     dists = distance_curves(x, ys, np.array([910, 1.0]))
     print(time.time() - t)
     print(dists)
-

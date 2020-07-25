@@ -1,13 +1,12 @@
 import unittest
-import array
 
 import numpy as np
-
-import Orange.data
 
 from orangecontrib.spectroscopy.data import _spectra_from_image, build_spec_table, getx
 from orangecontrib.spectroscopy.utils import get_hypercube, index_values, \
     InvalidAxisException, split_to_size
+
+import Orange.data
 
 
 class TestHyperspec(unittest.TestCase):
@@ -34,7 +33,7 @@ class TestHyperspec(unittest.TestCase):
         y_locs = coords[0, :, 1]
 
         features, spectra, data = _spectra_from_image(hypercube, features,
-            x_locs, y_locs)
+                                                      x_locs, y_locs)
         nd = build_spec_table(features, spectra, data)
 
         np.testing.assert_equal(d.X, nd.X)

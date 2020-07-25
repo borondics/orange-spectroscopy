@@ -111,7 +111,7 @@ def get_ndim_hyperspec(data, attrs):
     new_shape = tuple([lsa[2] for lsa in ls]) + (data.X.shape[1],)
     hyperspec = np.ones(new_shape) * np.nan
 
-    hyperspec[indices] = data.X
+    hyperspec[tuple(indices)] = data.X
 
     return hyperspec, ls
 

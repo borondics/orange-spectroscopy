@@ -1,8 +1,10 @@
 import numpy as np
-import Orange
-from Orange.widgets.tests.base import WidgetTest
+
 from orangecontrib.spectroscopy.utils import get_ndim_hyperspec
 from orangecontrib.spectroscopy.widgets.owbin import OWBin
+
+import Orange
+from Orange.widgets.tests.base import WidgetTest
 
 
 class TestOWBin(WidgetTest):
