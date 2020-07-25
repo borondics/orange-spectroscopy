@@ -512,6 +512,7 @@ class WiREReaders(FileFormat, SpectralFileFormat):
 
     def read_spectra(self):
         wdf_file = WDFReader(self.filename)
+        print('wdf_file.measurement_type', wdf_file.measurement_type)
 
         if wdf_file.measurement_type == 1: # single point spectra
             table = self.single_reader(wdf_file)
