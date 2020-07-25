@@ -8,7 +8,6 @@ import numpy as np
 import spectral.io.envi
 from scipy.interpolate import interp1d
 from scipy.io import matlab
-from renishawWiRE import WDFReader
 
 import Orange
 from Orange.data import \
@@ -138,20 +137,12 @@ def _spectra_from_image(X, features, x_locs, y_locs):
     y_locs = np.asarray(y_locs)
 
     # each spectrum has its own row
-    if len(X.shape) == 3: # 2D map
-        spectra = X.reshape((X.shape[0]*X.shape[1], X.shape[2]))
+    spectra = X.reshape((X.shape[0]*X.shape[1], X.shape[2]))
 
-        # locations
-        y_loc = np.repeat(np.arange(X.shape[0]), X.shape[1])
-        x_loc = np.tile(np.arange(X.shape[1]), X.shape[0])
-        metas = np.array([x_locs[x_loc], y_locs[y_loc]]).T
-
-    elif len(X.shape) == 2: # line scan
-        spectra = X
-
-        # locations
-        metas = np.vstack((x_locs, y_locs)).T
-
+    # locations
+    y_loc = np.repeat(np.arange(X.shape[0]), X.shape[1])
+    x_loc = np.tile(np.arange(X.shape[1]), X.shape[0])
+    metas = np.array([x_locs[x_loc], y_locs[y_loc]]).T
 
     domain = Orange.data.Domain([], None,
                                 metas=[Orange.data.ContinuousVariable.make("map_x"),
@@ -506,6 +497,7 @@ class agilentMosaicIFGReader(FileFormat, SpectralFileFormat):
 
         return (features, data, table)
 
+<<<<<<< HEAD
 class WiREReaders(FileFormat, SpectralFileFormat):
     EXTENSIONS = ('.wdf', '.WDF')
     DESCRIPTION = 'Renishaw WiRE WDF reader'
@@ -554,6 +546,8 @@ class WiREReaders(FileFormat, SpectralFileFormat):
 
         return _spectra_from_image(y_data, domvals, x_locs, y_locs)
 
+=======
+>>>>>>> parent of 1c43d8c... Renishaw reader - map OK
 
 class SPCReader(FileFormat):
     EXTENSIONS = ('.spc', '.SPC',)
