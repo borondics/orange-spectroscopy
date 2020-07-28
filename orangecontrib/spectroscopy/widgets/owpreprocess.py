@@ -31,8 +31,8 @@ from AnyQt.QtWidgets import (
     QWidget, QComboBox, QSpinBox,
     QListView, QVBoxLayout, QFormLayout, QSizePolicy, QStyle,
     QPushButton, QLabel, QMenu, QApplication, QAction, QScrollArea, QGridLayout,
-    QToolButton, QSplitter
-)
+    QToolButton, QSplitter, QButtonGroup,
+    QRadioButton)
 from AnyQt.QtGui import (
     QIcon, QStandardItemModel, QStandardItem,
     QKeySequence, QFont, QColor
@@ -448,8 +448,6 @@ class CurveShiftEditor(BaseEditorOrange):
     """
     Editor for CurveShift
     """
-    # TODO: the layout changes when I click the area of the preprocessor
-    #       EFFECT: the sidebar snaps in
 
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
@@ -457,13 +455,45 @@ class CurveShiftEditor(BaseEditorOrange):
         self.amount = 0.
 
         form = QFormLayout()
+        self._group = group = QButtonGroup(self)
+        rb_amount = QRadioButton(self, text="Shift by amount", checked=True)
         amounte = lineEditFloatRange(self, self, "amount", callback=self.edited.emit)
-        form.addRow("Shift Amount", amounte)
+
+        rb_toZero = QRadioButton(self, text="Shift Y(min) to 0", checked=False)
+
+        rb_YofXtoZero = QRadioButton(self, text="Shift Y(x) to 0", checked=False)
+
+        form.addRow(rb_amount, amounte)
+        form.addRow(rb_toZero)
+        form.addRow(rb_YofXtoZero)
+
+        group.addButton(rb_amount)
+        group.addButton(rb_toZero)
+        group.addButton(rb_YofXtoZero)
+
+        group.buttonClicked.connect(self.changed.emit)
+        # group.buttonClicked.connect(self.__on_buttonClicked)
+
         self.controlArea.setLayout(form)
 
     def setParameters(self, params):
         self.amount = params.get("amount", 0.)
 
+    # def __on_buttonClicked(self):
+    #     self.setMethod(self._group.checkedId())
+    #     self.edited.emit()
+    #
+    # def setMethod(self, method):
+    #     self.__method = method
+    #     b = self._group.button(method)
+    #     print(b.text())
+    #     b.setChecked(True)
+    #     # for widget in [self.attrcb, self.int_method_cb, self.lspin, self.uspin]:
+    #     #     widget.setEnabled(False)
+    #
+    #     # self.activateOptions()
+    #     self.changed.emit()
+    #
     @staticmethod
     def createinstance(params):
         params = dict(params)
