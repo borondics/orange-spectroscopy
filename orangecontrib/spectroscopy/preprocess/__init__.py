@@ -703,13 +703,16 @@ class _CurveShiftCommon(CommonDomain):
 
     def __init__(self, amount, domain):
         super().__init__(domain)
+        print('_CurveShiftCommon init')
         self.amount = amount
 
     def transformed(self, data):
+        print('_CurveShiftCommon transformed')
         return data.X + self.amount
 
 
 class CurveShift(Preprocess):
+    byAmount, minToZero, YofXtoZero = 0, 1, 2
 
     def __init__(self, amount=0.):
         self.amount = amount

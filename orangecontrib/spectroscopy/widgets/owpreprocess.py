@@ -448,52 +448,54 @@ class CurveShiftEditor(BaseEditorOrange):
     """
     Editor for CurveShift
     """
-
+    shift_types = [
+        ('Shift by amount', CurveShift.byAmount),
+        ('Shift Y(min) to 0', CurveShift.minToZero),
+        ('Shift Y(x) to 0', CurveShift.YofXtoZero),
+    ]
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
-
         self.amount = 0.
+        self.__method = CurveShift.byAmount
 
-        form = QFormLayout()
+        self.shiftForm = QFormLayout()
+        self.controlArea.setLayout(self.shiftForm)
+
         self._group = group = QButtonGroup(self)
-        rb_amount = QRadioButton(self, text="Shift by amount", checked=True)
-        amounte = lineEditFloatRange(self, self, "amount", callback=self.edited.emit)
 
-        rb_toZero = QRadioButton(self, text="Shift Y(min) to 0", checked=False)
+        for name, method in self.shift_types:
+            rb = QRadioButton(self, text=name, checked=self.__method == method)
 
-        rb_YofXtoZero = QRadioButton(self, text="Shift Y(x) to 0", checked=False)
+            if method is CurveShift.byAmount:
+                amounte = lineEditFloatRange(self, self, "amount", callback=self.edited.emit)
+                self.shiftForm.addRow(rb, amounte)
+            else:
+                self.shiftForm.addRow(rb)
 
-        form.addRow(rb_amount, amounte)
-        form.addRow(rb_toZero)
-        form.addRow(rb_YofXtoZero)
+            group.addButton(rb, method)
 
-        group.addButton(rb_amount)
-        group.addButton(rb_toZero)
-        group.addButton(rb_YofXtoZero)
+        group.buttonClicked.connect(self.__on_buttonClicked)
 
-        group.buttonClicked.connect(self.changed.emit)
-        # group.buttonClicked.connect(self.__on_buttonClicked)
-
-        self.controlArea.setLayout(form)
 
     def setParameters(self, params):
         self.amount = params.get("amount", 0.)
 
-    # def __on_buttonClicked(self):
-    #     self.setMethod(self._group.checkedId())
-    #     self.edited.emit()
-    #
-    # def setMethod(self, method):
-    #     self.__method = method
-    #     b = self._group.button(method)
-    #     print(b.text())
-    #     b.setChecked(True)
-    #     # for widget in [self.attrcb, self.int_method_cb, self.lspin, self.uspin]:
-    #     #     widget.setEnabled(False)
-    #
-    #     # self.activateOptions()
-    #     self.changed.emit()
-    #
+    def __on_buttonClicked(self):
+        self.setMethod(self._group.checkedId())
+        print('__on_buttonClicked', self._group.button(self._group.checkedId()).text())
+        self.edited.emit()
+
+    def setMethod(self, method):
+        self.__method = method
+        b = self._group.button(method)
+        print('setMethod', b.text())
+        b.setChecked(True)
+        # for widget in [self.attrcb, self.int_method_cb, self.lspin, self.uspin]:
+        #     widget.setEnabled(False)
+
+        # self.activateOptions()
+        self.changed.emit()
+
     @staticmethod
     def createinstance(params):
         params = dict(params)
