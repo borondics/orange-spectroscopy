@@ -517,6 +517,24 @@ class agilentMosaicIFGReader(FileFormat, SpectralFileFormat):
 
         return (features, data, table)
 
+#TODO check jcamp files exported from thermo
+# multiple Y colums!!?!?
+class JCAMPReader(FileFormat, SpectralFileFormat):
+    EXTENSIONS = ('.jdx', '.JDX', '.dx', '.DX')
+    DESCRIPTION = 'JCAMP-DX file reader'
+
+    def read_spectra(self):
+        import jcamp
+
+        try:
+            d = jcamp.JCAMP_reader(self.filename)
+            domvals, unique_x = np.unique(d['x'], return_index=True)
+            y_data = d['y'][unique_x]
+
+        except IOError:
+            print('Problem with file.')
+
+        return domvals, y_data, None
 
 class WiREReaders(FileFormat, SpectralFileFormat):
     EXTENSIONS = ('.wdf', '.WDF')
