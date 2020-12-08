@@ -1,1 +1,0 @@
-# File readers specific for the SOLEIL synchrotron
