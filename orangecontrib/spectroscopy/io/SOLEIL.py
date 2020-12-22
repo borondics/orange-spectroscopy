@@ -1,6 +1,8 @@
 # File readers specific for the SOLEIL synchrotron
 
 import numpy as np
+import h5py
+
 from Orange.data.io import FileFormat
 from orangecontrib.spectroscopy.data import SpectralFileFormat, _spectra_from_image
 
@@ -11,7 +13,6 @@ class HDF5Reader_HERMES(FileFormat, SpectralFileFormat):
     DESCRIPTION = 'HDF5 file @HERMRES/SOLEIL'
 
     def read_spectra(self):
-        import h5py
         hdf5_file = h5py.File(self.filename)
         if 'entry1/collection/beamline' in hdf5_file and \
                 hdf5_file['entry1/collection/beamline'][()].astype('str') == 'Hermes':
@@ -32,23 +33,18 @@ class HDF5Reader_ROCK(FileFormat, SpectralFileFormat):
 
     @property
     def sheets(self):
-        import h5py as h5
-
-        with h5.File(self.filename, "r") as dataf:
+        with h5py.File(self.filename, "r") as dataf:
             cube_nbrs = range(1, len(dataf["data"].keys())+1)
 
         return list(map(str, cube_nbrs))
 
     def read_spectra(self):
-
-        import h5py as h5
-
         if self.sheet:
             cube_nb = int(self.sheet)
         else:
             cube_nb = 1
 
-        with h5.File(self.filename, "r") as dataf:
+        with h5py.File(self.filename, "r") as dataf:
             cube_h5 = dataf["data/cube_{:0>5d}".format(cube_nb)]
 
             # directly read into float64 so that Orange.data.Table does not
