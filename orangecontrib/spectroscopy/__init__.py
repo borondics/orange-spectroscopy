@@ -1,7 +1,7 @@
 import Orange.data
 import os.path
-from . import data #register file formats
-
+from . import data
+from .io import SOLEIL
 
 def get_sample_datasets_dir():
     thispath = os.path.dirname(__file__)
