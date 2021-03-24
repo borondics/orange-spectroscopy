@@ -653,6 +653,7 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
     invertX = Setting(False)
     viewtype = Setting(INDIVIDUAL)
     show_grid = Setting(False)
+    show_zeroLine = Setting(False)
 
     selection_changed = pyqtSignal()
     new_sampling = pyqtSignal(object)
@@ -690,6 +691,7 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.markings = []
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
+        self.zeroLine = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen(color=(0, 0, 0)))
         self.plot.scene().sigMouseMoved.connect(self.mouse_moved_viewhelpers)
         self.plot.scene().sigMouseMoved.connect(self.plot.vb.mouseMovedEvent)
         self.proxy = pg.SignalProxy(self.plot.scene().sigMouseMoved, rateLimit=20,
@@ -783,6 +785,14 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         )
         self.show_grid_a.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         actions.append(self.show_grid_a)
+
+        self.show_zeroLine_a = QAction(
+            "Show zero line", self, shortcut=Qt.Key_0, checkable=True,
+            triggered=self.zeroLine_changed
+        )
+        self.show_zeroLine_a.setShortcutContext(Qt.WidgetWithChildrenShortcut)
+        actions.append(self.show_zeroLine_a)
+
         self.invertX_menu = QAction(
             "Invert X", self, shortcut=Qt.Key_X, checkable=True,
             triggered=self.invertX_changed
@@ -884,6 +894,7 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.labels_changed()  # apply saved labels
 
         self.grid_apply()
+        self.zeroLine_apply()
         self.invertX_apply()
         self.color_individual_apply()
         self._color_individual_cycle = COLORBREWER_SET1
@@ -987,6 +998,18 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.plot.showGrid(self.show_grid, self.show_grid, alpha=0.3)
         self.show_grid_a.setChecked(self.show_grid)
 
+    def zeroLine_changed(self):
+        self.show_zeroLine = not self.show_zeroLine
+        self.zeroLine_apply()
+
+    def zeroLine_apply(self):
+        if self.show_zeroLine:
+            self.zeroLine.show()
+            self.show_zeroLine_a.setChecked(self.show_zeroLine)
+        else:
+            self.zeroLine.hide()
+            self.show_zeroLine_a.setChecked(self.show_zeroLine)
+
     def invertX_changed(self):
         self.invertX = not self.invertX
         self.invertX_apply()
@@ -1041,6 +1064,7 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.plot.addItem(self.highlighted_curve, ignoreBounds=True)
         self.plot.addItem(self.vLine, ignoreBounds=True)
         self.plot.addItem(self.hLine, ignoreBounds=True)
+        self.plot.addItem(self.zeroLine, ignoreBounds=True)
         self.viewhelpers = True
         self.plot.addItem(self.curves_cont)
 
