@@ -34,7 +34,7 @@ from Orange.widgets.utils.annotated_data import ANNOTATED_DATA_SIGNAL_NAME
 from Orange.widgets.visualize.owscatterplotgraph import LegendItem
 from Orange.widgets.utils.concurrent import TaskState, ConcurrentMixin
 from Orange.widgets.visualize.utils.plotutils import HelpEventDelegate
-
+from Orange.widgets.utils.state_summary import format_summary_details
 
 from orangecontrib.spectroscopy.data import getx
 from orangecontrib.spectroscopy.utils import apply_columns_numpy
@@ -707,7 +707,7 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.markings = []
         self.vLine = pg.InfiniteLine(angle=90, movable=False)
         self.hLine = pg.InfiniteLine(angle=0, movable=False)
-        self.zeroline = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen(color=(0, 0, 0)))
+        self.zeroline = pg.InfiniteLine(angle=0, movable=False, pen=pg.mkPen(color=QColor(0, 0, 0)))
         self.plot.scene().sigMouseMoved.connect(self.mouse_moved_viewhelpers)
         self.plot.scene().sigMouseMoved.connect(self.plot.vb.mouseMovedEvent)
         self.proxy = pg.SignalProxy(self.plot.scene().sigMouseMoved, rateLimit=20,
@@ -1010,6 +1010,8 @@ class CurvePlot(QWidget, OWComponent, SelectionGroupMixin):
 
     def grid_changed(self):
         self.show_grid = not self.show_grid
+        self.show_zeroline = False
+        self.zeroline.hide()
         self.grid_apply()
 
     def grid_apply(self):
@@ -1604,6 +1606,8 @@ class OWSpectra(OWWidget):
         self.curveplot.selection_changed.connect(self.selection_changed)
         self.curveplot.new_sampling.connect(self._showing_sample_info)
         self.mainArea.layout().addWidget(self.curveplot)
+        self.info.set_input_summary(self.info.NoInput)
+        self.info.set_output_summary(self.info.NoOutput)
         self.resize(900, 700)
 
     @Inputs.data
@@ -1613,8 +1617,16 @@ class OWSpectra(OWWidget):
         self.Warning.no_x.clear()
         self.openContext(data)
         self.curveplot.set_data(data, auto_update=False)
+
+        if data is None:
+            self.info.set_input_summary(self.info.NoInput)
+        else:
+            self.info.set_input_summary(data.approx_len(),
+                                        format_summary_details(data))
+
         if data is not None and not len(self.curveplot.data_x):
             self.Warning.no_x()
+
         self.selection_changed()
 
     @Inputs.data_subset
@@ -1636,6 +1648,7 @@ class OWSpectra(OWWidget):
             selection_indices = np.flatnonzero(self.curveplot.selection_group)
             if len(selection_indices):
                 selected = self.curveplot.data[selection_indices]
+                self.info.set_output_summary(len(selected), format_summary_details(selected))
         self.Outputs.selected_data.send(selected)
 
     def _showing_sample_info(self, num):
