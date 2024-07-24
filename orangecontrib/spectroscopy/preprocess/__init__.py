@@ -55,14 +55,14 @@ class MNFDenoisingFeature(SelectColumn):
     InheritEq = True
 
 
-class _MNFCommon(CommonDomain):
+class _MNFCommon(CommonDomainOrderUnknowns):
 
     def __init__(self, domain, components):
         super().__init__(domain)
         self.domain = domain
         self.components = components
 
-    def transformed(self, data):
+    def transformed(self, X, _):
         """
         Minimum Noise Fraction calculation
 
@@ -77,7 +77,6 @@ class _MNFCommon(CommonDomain):
         :return: denoised data cube
         """
 
-        X = data.X
         m = X.shape
 
         N = np.zeros((m[0], m[1]), dtype=np.float64)
