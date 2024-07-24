@@ -79,11 +79,8 @@ class _MNFCommon(CommonDomainOrderUnknowns):
 
         m = X.shape
 
-        N = np.zeros((m[0], m[1]), dtype=np.float64)
-
-        # noise matrix calculation
-        for i in range((m[0] - 1)):
-            N[i, :] = X[i, :] - X[i + 1, :]
+        diffs = -np.diff(X, axis=0)
+        N = np.vstack((diffs, np.zeros((1, diffs.shape[1]))))
 
         # noise whitening
         V1, S, _ = np.linalg.svd(np.dot(N.T, N))
