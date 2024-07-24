@@ -3,7 +3,7 @@ import pyqtgraph as pg
 
 from AnyQt.QtCore import Qt
 from AnyQt.QtWidgets import (
-    QComboBox, QSpinBox, QVBoxLayout, QHBoxLayout, QFormLayout, QSizePolicy, QLabel
+    QComboBox, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel
 )
 from AnyQt.QtGui import QColor
 
@@ -22,7 +22,7 @@ from orangecontrib.spectroscopy.preprocess.transform import SpecTypes
 from orangecontrib.spectroscopy.widgets.gui import lineEditFloatRange, MovableVline, \
     connect_line, floatornone, round_virtual_pixels
 from orangecontrib.spectroscopy.widgets.preprocessors.utils import BaseEditorOrange, \
-    REFERENCE_DATA_PARAM, BaseEditor
+    REFERENCE_DATA_PARAM
 from orangecontrib.spectroscopy.widgets.preprocessors.registry import preprocess_editors
 
 
@@ -345,7 +345,7 @@ class PCADenoisingEditor(BaseEditorOrange):
         self.controlArea.setLayout(form)
 
         compspin = gui.spin(self, self, "components", minv=1, maxv=100,
-                            step=1, callback=self._components_edited)
+                            step=1, callback=self.edited.emit)
 
         endlabel = QLabel("components.")
         hboxLayout = QHBoxLayout()
@@ -353,9 +353,6 @@ class PCADenoisingEditor(BaseEditorOrange):
         hboxLayout.addWidget(endlabel)
 
         form.addRow("Keep", hboxLayout)
-
-    def _components_edited(self):
-        self.edited.emit()
 
     def setParameters(self, params):
         self.components = params.get("components", 5)
@@ -367,7 +364,7 @@ class PCADenoisingEditor(BaseEditorOrange):
         return PCADenoising(components=components)
 
 
-class MNFDenoisingEditor(BaseEditor):
+class MNFDenoisingEditor(BaseEditorOrange):
     """
     Editor for Minimum Noise Fraction denoising
     """
@@ -376,42 +373,25 @@ class MNFDenoisingEditor(BaseEditor):
     qualname = "orangecontrib.spectroscopy.mnf_denoising"
 
     def __init__(self, parent=None, **kwargs):
-        BaseEditor.__init__(self, parent, **kwargs)
-        self.__components = 5
+        super().__init__(parent, **kwargs)
+
+        self.components = 5
 
         form = QFormLayout()
+        self.controlArea.setLayout(form)
 
-        self.__compspin = compspin = QSpinBox(
-            minimum=1, maximum=100, value=self.__components)
+        compspin = gui.spin(self, self, "components", minv=1, maxv=100,
+                            step=1, callback=self.edited.emit)
 
         endlabel = QLabel("components.")
         hboxLayout = QHBoxLayout()
-        hboxLayout.addWidget(self.__compspin)
+        hboxLayout.addWidget(compspin)
         hboxLayout.addWidget(endlabel)
 
         form.addRow("Keep", hboxLayout)
 
-        self.setLayout(form)
-
-        compspin.valueChanged[int].connect(self.setComponents)
-        compspin.editingFinished.connect(self.edited)
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
-
-    def setComponents(self, components):
-        if self.__components != components:
-            self.__components = components
-            with blocked(self.__compspin):
-                self.__compspin.setValue(components)
-            self.changed.emit()
-
-    def sd(self):
-        return self.__components
-
     def setParameters(self, params):
-        self.setComponents(params.get("components", 5))
-
-    def parameters(self):
-        return {"components": self.__components}
+        self.components = params.get("components", 5)
 
     @staticmethod
     def createinstance(params):
