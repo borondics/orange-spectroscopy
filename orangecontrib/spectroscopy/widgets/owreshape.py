@@ -110,8 +110,8 @@ class OWReshape(OWWidget):
         if self.data and self.xpoints is not None and self.ypoints is not None \
                 and self.xpoints * self.ypoints == len(self.data):
             used_names = [var.name for var in self.data.domain.variables + self.data.domain.metas]
-            xmeta = Orange.data.ContinuousVariable.make(get_unique_names(used_names, "X"))
-            ymeta = Orange.data.ContinuousVariable.make(get_unique_names(used_names, "Y"))
+            xmeta = Orange.data.ContinuousVariable.make(get_unique_names(used_names, "map_x"))
+            ymeta = Orange.data.ContinuousVariable.make(get_unique_names(used_names, "map_y"))
             # add new variables for X and Y dimension ot the data domain
             metas = self.data.domain.metas + (xmeta, ymeta)
             domain = Orange.data.Domain(self.data.domain.attributes, self.data.domain.class_vars, metas)
