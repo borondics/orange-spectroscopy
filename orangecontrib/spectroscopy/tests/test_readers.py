@@ -224,6 +224,21 @@ class TestRenishawReader(unittest.TestCase):
         self.assertEqual(max(getx(d)), 2787.509766)
 
 
+class Test_PerkinElmer_Reader(unittest.TestCase):
+
+    def test_single_sp_reader(self):
+        d = Orange.data.Table("perkinelmer/single_PE_spectrum.sp")
+        self.assertEqual(d.X[0][4], 100.65028381347656)
+        self.assertEqual(min(getx(d)), 750.0)
+        self.assertEqual(max(getx(d)), 4000.0)
+
+    def test_map_reader(self):
+        d = Orange.data.Table("perkinelmer/4x4_pixel_PE_image.fsm")
+        self.assertEqual(d.X[3][4], 92.9105453491211)
+        self.assertEqual(min(getx(d)), 750.0)
+        self.assertEqual(max(getx(d)), 4000.0)
+
+
 class TestAgilentReader(unittest.TestCase):
 
     def test_image_read(self):
