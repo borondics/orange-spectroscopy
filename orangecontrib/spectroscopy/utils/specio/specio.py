@@ -1,12 +1,11 @@
 import struct
 import numpy as np
 
-### This file is based on the development chain indicated below:
+# This file is based on the development chain indicated below:
 
-## The below file readers are based on file readers written by Specio
-## (https://github.com/paris-saclay-cds/specio) with the following
-## license:
-
+# The below file readers are based on file readers written by Specio
+# (https://github.com/paris-saclay-cds/specio) with the following
+# license:
 # BSD 3-Clause License
 
 # Copyright (c) 2017, Guillaume Lemaitre

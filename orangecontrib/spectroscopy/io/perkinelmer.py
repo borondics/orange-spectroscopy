@@ -5,7 +5,7 @@ import numpy as np
 from Orange.data import Table, Domain, FileFormat
 
 from orangecontrib.spectroscopy.io.util import SpectralFileFormat, _spectra_from_image_2d
-from orangecontrib.spectroscopy.io.specio import BlockReader, PerkinElmer
+from orangecontrib.spectroscopy.utils.specio.specio import BlockReader, PerkinElmer
 
 # This code is partially based on software developed in the Diamond synchrotron.
 
