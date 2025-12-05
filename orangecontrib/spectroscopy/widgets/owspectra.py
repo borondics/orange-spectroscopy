@@ -111,6 +111,9 @@ class ParameterSetter(CommonParameterSetter):
             self.VIEW_RANGE_BOX: {
                 "X": {"xMin": (FloatOrUndefined(), None), "xMax": (FloatOrUndefined(), None)},
                 "Y": {"yMin": (FloatOrUndefined(), None), "yMax": (FloatOrUndefined(), None)}
+            },
+            self.LINE_BOX: {
+              self.LINE_LABEL: self.LINE_SETTING
             }
         }
 
@@ -144,6 +147,10 @@ class ParameterSetter(CommonParameterSetter):
     @property
     def getAxis(self):
         return self.master.plot.getAxis
+
+    @property
+    def line_items(self):
+        return self.master.plot.listDataItems()
 
     @property
     def legend_items(self):
