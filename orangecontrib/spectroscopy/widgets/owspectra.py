@@ -5,6 +5,7 @@ import random
 import time
 import warnings
 from xml.sax.saxutils import escape
+from typing import List
 
 try:
     import dask
@@ -26,7 +27,7 @@ import pyqtgraph as pg
 from pyqtgraph.graphicsItems.ViewBox import ViewBox
 from pyqtgraph import Point, GraphicsObject
 
-from orangewidget.utils.visual_settings_dlg import VisualSettingsDialog
+from orangewidget.utils.visual_settings_dlg import VisualSettingsDialog, SettingsType
 
 import Orange.data
 from Orange.data import DiscreteVariable
@@ -41,7 +42,7 @@ from Orange.widgets.utils import saveplot
 from Orange.widgets.visualize.owscatterplotgraph import LegendItem
 from Orange.widgets.utils.concurrent import TaskState, ConcurrentMixin
 from Orange.widgets.visualize.utils.plotutils import HelpEventDelegate, PlotWidget
-from Orange.widgets.visualize.utils.customizableplot import CommonParameterSetter
+from Orange.widgets.visualize.utils.customizableplot import CommonParameterSetter, Updater
 
 from orangecontrib.spectroscopy import dask_client
 from orangecontrib.spectroscopy.data import getx
@@ -91,10 +92,19 @@ class ParameterSetter(CommonParameterSetter):
     VIEW_RANGE_BOX = "View Range"
 
     def __init__(self, master):
+        self.master = master
         super().__init__()
         self.master = master
 
     def update_setters(self):
+        LINE_BOX_LABEL = "Line settings"
+        LINE_LABEL = "thickness and style"
+        LINE_SETTING: SettingsType = {
+            "Width ": (range(1, 15), 1),
+            "Style ": (list(Updater.LINE_STYLES), Updater.DEFAULT_LINE_STYLE),
+        }
+
+
         self.initial_settings = {
             self.ANNOT_BOX: {
                 self.TITLE_LABEL: {self.TITLE_LABEL: ("", "")},
@@ -112,8 +122,8 @@ class ParameterSetter(CommonParameterSetter):
                 "X": {"xMin": (FloatOrUndefined(), None), "xMax": (FloatOrUndefined(), None)},
                 "Y": {"yMin": (FloatOrUndefined(), None), "yMax": (FloatOrUndefined(), None)}
             },
-            self.LINE_BOX: {
-              self.LINE_LABEL: self.LINE_SETTING
+            LINE_BOX_LABEL: {
+              LINE_LABEL: LINE_SETTING
             }
         }
 
@@ -131,6 +141,27 @@ class ParameterSetter(CommonParameterSetter):
             self.viewbox.setRange(self.viewbox.viewRect())
 
         self._setters[self.VIEW_RANGE_BOX] = {"X": set_limits, "Y": set_limits}
+
+        def update_lines(**settings):
+            for item in self.line_items:
+                pen = item.opts["pen"]
+
+                style = settings.get("Style ")
+                if style is not None:
+                    pen.setStyle(Updater.LINE_STYLES[style])
+
+                width = settings.get("Width ")
+                if width is not None:
+                    pen.setWidth(width)
+
+                item.setPen(pen)
+
+        self._setters[LINE_BOX_LABEL] = {LINE_LABEL: update_lines}
+
+    @property
+    def line_items(self):
+        #TODO need to change all lines
+        return self.master.plot.listDataItems()
 
     @property
     def viewbox(self):
